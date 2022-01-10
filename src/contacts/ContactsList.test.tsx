@@ -7,6 +7,7 @@ import { toast } from 'react-toastify';
 
 const mockedPerson: Person = {
   id: '1',
+  initials: 'RG',
   jobTitle: 'Fabricator',
   emailAddress: 'Ron_Giles3711@dionrab.com',
   firstNameLastName: 'Ron Giles'
@@ -63,11 +64,7 @@ describe('ApodViewer', () => {
         id: '2'
       }
     ];
-
-    const apiDataMock = jest
-      .spyOn(api, 'apiData')
-      .mockResolvedValueOnce(firstData)
-      .mockResolvedValueOnce(secondData);
+    jest.spyOn(api, 'apiData').mockResolvedValueOnce(firstData).mockResolvedValueOnce(secondData);
 
     const { getByRole } = render(<ContactsList />);
 

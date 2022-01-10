@@ -1,12 +1,12 @@
 import React from 'react';
 import { render, within } from '@testing-library/react';
 import { PersonInfo, PersonInfoProps } from './PersonInfo';
-import { Person } from 'types/Person';
 
 describe('PersonInfo', () => {
   const props: PersonInfoProps = {
     data: {
       id: '1',
+      initials: 'RG',
       jobTitle: 'Fabricator',
       emailAddress: 'Ron_Giles3711@dionrab.com',
       firstNameLastName: 'Ron Giles'

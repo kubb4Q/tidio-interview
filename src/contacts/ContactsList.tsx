@@ -1,6 +1,6 @@
 import React from 'react';
 import { apiData } from 'infrastructure/persistence/api';
-import { Person } from 'types/Person';
+import { Person, PersonDto, toPerson } from 'types/Person';
 import { PersonInfo } from './PersonInfo';
 import './ContactsList.css';
 import { Loader } from 'ui/Loader';
@@ -8,7 +8,7 @@ import { toast } from 'react-toastify';
 
 const useApiData = () => {
   const [loading, setLoading] = React.useState(true);
-  const [data, setData] = React.useState<Person[]>([]);
+  const [data, setData] = React.useState<PersonDto[]>([]);
   const [error, setError] = React.useState(null);
   const mountedRef = React.useRef(true);
 
@@ -51,7 +51,7 @@ export const ContactsList: React.FC = () => {
   const [selected] = React.useState<Person[]>([]);
 
   React.useEffect(() => {
-    setPeople(people.concat(data));
+    setPeople(people.concat(data.map(toPerson)));
   }, [data]);
 
   React.useEffect(() => {
@@ -59,8 +59,6 @@ export const ContactsList: React.FC = () => {
       toast.error('Unable to fetch another data batch. Click "Load more" to try again');
     }
   }, [isError]);
-
-  //  TODO fetch contacts using apiData function, handle loading and error states
 
   return (
     <div className="contact-list">
