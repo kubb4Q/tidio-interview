@@ -3,6 +3,7 @@ import { render, screen, waitFor, cleanup, fireEvent } from '@testing-library/re
 import { ContactsList } from './ContactsList';
 import * as api from 'infrastructure/persistence/api';
 import { Person } from 'types/Person';
+import { toast } from 'react-toastify';
 
 const mockedPerson: Person = {
   id: '1',
@@ -19,7 +20,7 @@ beforeEach(() => {
 });
 
 describe('ApodViewer', () => {
-  test('should call fetch data from api on load', async () => {
+  test('should call fetch data from api on mount', async () => {
     const apiDataMock = jest.spyOn(api, 'apiData');
 
     render(<ContactsList />);
@@ -30,9 +31,7 @@ describe('ApodViewer', () => {
   });
 
   test('should return 2 personInfo objects when no error', async () => {
-    const apiDataMock = jest
-      .spyOn(api, 'apiData')
-      .mockResolvedValue([mockedPerson, { ...mockedPerson, id: '2' }]);
+    jest.spyOn(api, 'apiData').mockResolvedValue([mockedPerson, { ...mockedPerson, id: '2' }]);
 
     render(<ContactsList />);
 
@@ -41,7 +40,7 @@ describe('ApodViewer', () => {
     });
   });
 
-  test('when click load more button should call apiData 2 times', async () => {
+  test('should call apiData 2 times when click load more button', async () => {
     const apiDataMock = jest.spyOn(api, 'apiData');
 
     const { getByRole } = render(<ContactsList />);
@@ -56,7 +55,7 @@ describe('ApodViewer', () => {
     expect(apiDataMock).toBeCalledTimes(2);
   });
 
-  test('when click load more button new data should be added to list', async () => {
+  test('should be added to list when click load more button new data', async () => {
     const firstData = [mockedPerson];
     const secondData = [
       {
@@ -83,6 +82,17 @@ describe('ApodViewer', () => {
       expect(screen.getAllByTestId('person-info').length).toBe(
         firstData.length + secondData.length
       );
+    });
+  });
+
+  test('should call toast.error when call fetch data throws error', async () => {
+    jest.spyOn(api, 'apiData').mockRejectedValue({});
+    const toastSpy = jest.spyOn(toast, 'error');
+
+    render(<ContactsList />);
+
+    await waitFor(() => {
+      expect(toastSpy).toBeCalled();
     });
   });
 });
