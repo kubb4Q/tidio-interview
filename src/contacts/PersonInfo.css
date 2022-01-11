@@ -20,6 +20,10 @@
   border: 2px solid pink;
 }
 
+.person-info__selected {
+  outline: solid;
+}
+
 .top-part {
   display: flex;
   flex-direction: row;

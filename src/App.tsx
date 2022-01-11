@@ -17,6 +17,7 @@ function App() {
         pauseOnFocusLoss
         draggable
         pauseOnHover
+        limit={10}
       />
     </div>
   );

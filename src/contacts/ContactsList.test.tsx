@@ -1,13 +1,12 @@
 import React from 'react';
-import { render, screen, waitFor, cleanup, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor, cleanup, fireEvent, within } from '@testing-library/react';
 import { ContactsList } from './ContactsList';
 import * as api from 'infrastructure/persistence/api';
-import { Person } from 'types/Person';
+import { PersonDto } from 'types/Person';
 import { toast } from 'react-toastify';
 
-const mockedPerson: Person = {
+const mockedPersonDto: PersonDto = {
   id: '1',
-  initials: 'RG',
   jobTitle: 'Fabricator',
   emailAddress: 'Ron_Giles3711@dionrab.com',
   firstNameLastName: 'Ron Giles'
@@ -20,7 +19,7 @@ beforeEach(() => {
   localStorage.clear();
 });
 
-describe('ApodViewer', () => {
+describe('ContactList', () => {
   test('should call fetch data from api on mount', async () => {
     const apiDataMock = jest.spyOn(api, 'apiData');
 
@@ -32,7 +31,9 @@ describe('ApodViewer', () => {
   });
 
   test('should return 2 personInfo objects when no error', async () => {
-    jest.spyOn(api, 'apiData').mockResolvedValue([mockedPerson, { ...mockedPerson, id: '2' }]);
+    jest
+      .spyOn(api, 'apiData')
+      .mockResolvedValue([mockedPersonDto, { ...mockedPersonDto, id: '2' }]);
 
     render(<ContactsList />);
 
@@ -57,10 +58,10 @@ describe('ApodViewer', () => {
   });
 
   test('should be added to list when click load more button new data', async () => {
-    const firstData = [mockedPerson];
+    const firstData = [mockedPersonDto];
     const secondData = [
       {
-        ...mockedPerson,
+        ...mockedPersonDto,
         id: '2'
       }
     ];
@@ -90,6 +91,36 @@ describe('ApodViewer', () => {
 
     await waitFor(() => {
       expect(toastSpy).toBeCalled();
+    });
+  });
+
+  test('should call toast.error when call fetch data throws error', async () => {
+    jest.spyOn(api, 'apiData').mockRejectedValue({});
+    const toastSpy = jest.spyOn(toast, 'error');
+
+    render(<ContactsList />);
+
+    await waitFor(() => {
+      expect(toastSpy).toBeCalled();
+    });
+  });
+
+  test('should selected personInfo be placed on top of list when personInfo selected', async () => {
+    const jobTitleValue = 'testingJobTitle'.toUpperCase();
+    const mockedPeopleDtos: PersonDto[] = [
+      mockedPersonDto,
+      { ...mockedPersonDto, id: '2' },
+      { ...mockedPersonDto, id: '3', jobTitle: jobTitleValue }
+    ];
+    jest.spyOn(api, 'apiData').mockResolvedValueOnce(mockedPeopleDtos);
+
+    const { getAllByTestId } = render(<ContactsList />);
+
+    const personInfos = await screen.findAllByTestId('person-info');
+    fireEvent.click(personInfos[2]);
+
+    await waitFor(() => {
+      expect(within(getAllByTestId('person-info')[0]).getByText(jobTitleValue)).toBeInTheDocument();
     });
   });
 });

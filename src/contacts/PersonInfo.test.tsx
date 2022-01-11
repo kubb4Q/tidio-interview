@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, within } from '@testing-library/react';
+import { fireEvent, render, within } from '@testing-library/react';
 import { PersonInfo, PersonInfoProps } from './PersonInfo';
 
 describe('PersonInfo', () => {
@@ -33,5 +33,14 @@ describe('PersonInfo', () => {
     expect(
       within(getByTestId('person-info')).getByText(props.data.firstNameLastName)
     ).toBeInTheDocument();
+  });
+
+  test('should call onClick method when click on PersonInfo', async () => {
+    const mockFn = jest.fn();
+    const { getByTestId } = render(<PersonInfo {...props} onClick={mockFn} />);
+
+    fireEvent.click(getByTestId('person-info'));
+
+    expect(mockFn).toHaveBeenCalled();
   });
 });

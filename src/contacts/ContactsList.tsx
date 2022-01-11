@@ -48,7 +48,7 @@ const useApiData = () => {
 export const ContactsList: React.FC = () => {
   const { fetchData, isLoading, data, isError } = useApiData();
   const [people, setPeople] = React.useState<Person[]>([]);
-  const [selected] = React.useState<Person[]>([]);
+  const [selected, setSelected] = React.useState<Person[]>([]);
 
   React.useEffect(() => {
     setPeople(people.concat(data.map(toPerson)));
@@ -60,14 +60,46 @@ export const ContactsList: React.FC = () => {
     }
   }, [isError]);
 
+  const handleSelect = (person: Person) => () => {
+    const index = people.findIndex(({ id }) => id === person.id);
+
+    if (index > 0) {
+      setPeople(people.slice(0, index).concat(people.slice(index + 1)));
+    } else {
+      setPeople(people.slice(1));
+    }
+
+    setSelected([person].concat(selected));
+    toast.success(`Card with id:${person.id} selected and moved to top of list`);
+  };
+
+  const handleUnselect = (person: Person) => () => {
+    const index = selected.findIndex(({ id }) => id === person.id);
+
+    if (index > 0) {
+      setSelected(selected.slice(0, index).concat(selected.slice(index + 1)));
+    } else {
+      setSelected(selected.slice(1));
+    }
+
+    setPeople([person].concat(people));
+    toast.success(`Card with id:${person.id} unselected and moved to top of unselected list`);
+  };
+
   return (
     <div className="contact-list">
       <div className="selected">Selected contacts: {selected.length}</div>
-      <div className="list">
-        {people.map((personInfo) => (
-          <PersonInfo key={personInfo.id} data={personInfo} />
-        ))}
-      </div>
+      {selected.map((personInfo) => (
+        <PersonInfo
+          key={`${personInfo.id}-selected`}
+          data={personInfo}
+          onClick={handleUnselect(personInfo)}
+          selected
+        />
+      ))}
+      {people.map((personInfo) => (
+        <PersonInfo key={personInfo.id} data={personInfo} onClick={handleSelect(personInfo)} />
+      ))}
       {isLoading ? (
         <Loader />
       ) : (
